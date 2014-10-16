@@ -1,0 +1,61 @@
+#include "control.h"
+
+int C_Init()
+{
+	SETPOINT[0] = 0;
+	SETPOINT[1] = 0;
+	SETPOINT[2] = 0;
+
+<<<<<<< .mine
+	a = 6.820326068784110e+06;
+	b = 1.700712897992126e+06;
+=======
+//	3.999464053756402e-04, 3.998930827290227e-04, -1.999592081594453, 0.999600079989334
+	a = 3.999464053756402e-04;
+	b = 3.998930827290227e-04;
+>>>>>>> .r16
+	c = 1;
+<<<<<<< .mine
+	d = -0.166211742211110;
+	e = 0.018315638888734;
+=======
+	d = -1.999592081594453;
+	e = 0.999600079989334;
+>>>>>>> .r16
+
+	i=0;
+
+	return 0;
+}
+
+int C_Kill()
+{
+	return 0;
+}
+
+int C_Core()
+{
+	//MALHA COMPLETA
+	double position;
+
+	SETPOINT[0] = SETPOINT[1];
+	SETPOINT[1] = SETPOINT[2];
+
+	position = a*TORQUE[1]+b*TORQUE[0]-d*SETPOINT[1]-e*SETPOINT[0];
+	position = position/c;
+
+//	SETPOINT[2]=position;
+	SETPOINT[2]=TORQUE[2]*200;
+
+    if (SETPOINT[2] >= 30) SETPOINT[2] = 30;
+    if (SETPOINT[2] <= -30) SETPOINT[2] = -30;
+
+<<<<<<< .mine
+//    rt_printf("\t%5.8f \t %5.8f\n ",SETPOINT[2], TORQUE[2]);
+=======
+//    rt_printf("\t%5.8f \t %5.8f\n ",SETPOINT[2], TORQUE[2]);
+    rt_printf("\t%5.8f \t %5.8f\n ",SETPOINT[2], TORQUE[2]);
+>>>>>>> .r16
+
+	return 0;
+}

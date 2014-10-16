@@ -1,0 +1,176 @@
+#include "sensor.h"
+
+int S_Init()
+{
+	dsccb.base_address=0x300;
+	dsccb.int_level = 7;
+
+	memset(&dscadsettings, 0, sizeof(DSCADSETTINGS));
+
+	dscadsettings.range = RANGE_5;
+	dscadsettings.gain = GAIN_1;
+	dscadsettings.load_cal = (BYTE)FALSE;
+	dscadsettings.current_channel = 0;
+
+	dscadscan.low_channel = 0;
+	dscadscan.high_channel = 0;
+	dscadscan.gain = dscadsettings.gain;
+
+	samples = (DSCSAMPLE*)malloc( sizeof(DSCSAMPLE) * ( dscadscan.high_channel - dscadscan.low_channel + 1 ) );
+
+	VOLTAGEREFERENCE = 2.45;
+
+	TORQUE[0] = 0;
+	TORQUE[1] = 0;
+	TORQUE[2] = 0;
+
+	return 0;
+}
+
+int S_Calibration(){
+	int i;
+
+	dsccb.base_address=0x300;
+	dsccb.int_level = 3;
+
+	rt_printf( "Calibração dos conversores AD...\n\n" );
+
+	if( dscInit( DSC_VERSION ) != DE_NONE )
+	{
+		dscGetLastError(&errorParams);
+		rt_printf( "dscInit error: %s %s\n", dscGetErrorString(errorParams.ErrCode), errorParams.errstring );
+		return 0;
+	}
+
+	if(dscInitBoard(DSC_DMM16AT, &dsccb, &dscb)!= DE_NONE)
+	{
+		dscGetLastError(&errorParams);
+		rt_printf( "dscInitBoard error: %s %s\n", dscGetErrorString(errorParams.ErrCode), errorParams.errstring );
+		return 0;
+	}
+
+	dscautocal.adrange = 0xFF;
+	dscautocal.use_eeprom = (BYTE)TRUE;
+	dscautocal.boot_adrange = 0;
+
+	if( (result = dscADAutoCal( dscb, &dscautocal )) != DE_NONE )
+ 	{
+		dscGetLastError(&errorParams);
+		rt_printf("dscADAutoCal error: %s %s\n", dscGetErrorString(errorParams.ErrCode), errorParams.errstring );
+ 		return 0;
+ 	}
+
+	for( i = 0; i < 16; i++ )
+	{
+		if ( ( i > 3 && i < 8 )  )
+			continue;
+
+		dscautocal.adrange = i;
+		dscautocal.ad_gain = 0;
+		dscautocal.ad_offset = 0;
+
+		if( ( result = dscADCalVerify( dscb, &dscautocal ) ) != DE_NONE )
+		{
+			dscGetLastError(&errorParams);
+			rt_fprintf( "dscADCalVerify error: %s %s\n", dscGetErrorString(errorParams.ErrCode), errorParams.errstring );
+			return 0;
+		}
+
+		rt_printf( "Configuration Mode: %d, Offset Error: %9.3f, Gain Error: %9.3f\n", i, dscautocal.ad_offset, dscautocal.ad_gain );
+
+		if ( fabs( dscautocal.ad_offset ) > 2.0f ||
+			 fabs( dscautocal.ad_gain ) > 2.0f )
+			rt_printf( "Value for offset or gain exceeded specified tolerance\n" );
+		else rt_printf( "Values for offset and gain met specified tolerance\n" );
+	}
+
+	dscFree();
+
+	rt_printf( "Calibração dos conversores AD... COMPLETA\n\n" );
+}
+
+int S_Kill()
+{
+	dscFree();
+	return 0;
+}
+
+int S_Core()
+{
+	int i;
+	double torque;
+
+	if( dscInit( DSC_VERSION ) != DE_NONE )
+	{
+		dscGetLastError(&errorParams);
+		rt_printf( stderr, "dscInit error: %s %s\n", dscGetErrorString(errorParams.ErrCode), errorParams.errstring );
+		return 0;
+	}
+
+	if(dscInitBoard(DSC_DMM16AT, &dsccb, &dscb)!= DE_NONE)
+	{
+		dscGetLastError(&errorParams);
+		rt_printf( stderr, "dscInitBoard error: %s %s\n", dscGetErrorString(errorParams.ErrCode), errorParams.errstring );
+		return 0;
+	}
+
+	if( ( result = dscADSetSettings( dscb, &dscadsettings ) ) != DE_NONE )
+	{
+		dscGetLastError(&errorParams);
+		rt_printf( stderr, "dscADSetSettings error: %s %s\n", dscGetErrorString(errorParams.ErrCode), errorParams.errstring );
+		return 0;
+	}
+
+	if( ( result = dscADScan( dscb, &dscadscan, samples ) ) != DE_NONE )
+			{
+				dscGetLastError(&errorParams);
+				fprintf( stderr, "dscADScan error: %s %s\n", dscGetErrorString(errorParams.ErrCode), errorParams.errstring );
+				free( samples ); // remember to deallocate malloc() memory
+				return 0;
+			}
+
+			if (SENSORING) rt_printf( "\nActual voltages:" );
+
+			for( i = 0; i < (dscadscan.high_channel - dscadscan.low_channel)+ 1; i++)
+			{
+				if( dscADCodeToVoltage(dscb, dscadsettings, dscadscan.sample_values[i], &voltage) != DE_NONE)
+				{
+					dscGetLastError(&errorParams);
+					fprintf( stderr, "dscInit error: %s %s\n", dscGetErrorString(errorParams.ErrCode), errorParams.errstring );
+					free(samples);
+					return 0;
+				}
+
+				if (SENSORING) rt_printf(" %5.3lfV", voltage);
+				if (i==0)
+				{
+<<<<<<< .mine
+					DEADZONE = .08;
+=======
+					DEADZONE = .04;
+>>>>>>> .r16
+
+					TORQUE[0] = TORQUE[1];
+					TORQUE[1] = TORQUE[2];
+
+					torque=(voltage-VOLTAGEREFERENCE);
+
+					//DEADZONE
+					torque = (voltage-VOLTAGEREFERENCE);
+					if 		(TORQUE[1]-torque<=-DEADZONE)
+						TORQUE[2]=torque-DEADZONE;
+					else if (TORQUE[1]-torque>=DEADZONE)
+						TORQUE[2]=torque;
+					else TORQUE[2]=TORQUE[1]+DEADZONE;
+
+					if (SENSORING) rt_printf("\n Torque: %5.3lfNm %5.3lfNm %5.3lfNm", TORQUE[0], TORQUE[1], TORQUE[2]);
+				}
+
+			}
+
+	dscFree();
+
+	return 0;
+}
+
+

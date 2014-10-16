@@ -1,0 +1,5 @@
+control.d: ../control.c ../control.h ../global.h
+
+../control.h:
+
+../global.h:

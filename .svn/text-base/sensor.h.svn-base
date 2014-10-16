@@ -1,0 +1,25 @@
+#ifndef SENSOR_H_
+#define SENSOR_H_
+
+#include "dscud.h"
+#include "global.h"
+#include "include.h"
+
+BYTE result; // returned error code
+DSCB dscb;   // handle used to refer to the board
+DSCCB dsccb; // structure containing board settings
+DSCSAMPLE sample; // sample reading
+DSCADSETTINGS dscadsettings; // structure containing A/D conversion settings
+ERRPARAMS errorParams;       // structure for returning error code and error string
+DFLOAT voltage;
+DSCAUTOCAL dscautocal; // structure containing auto-calibration settings
+
+DSCSAMPLE* samples;          // sample readings
+DSCADSCAN dscadscan;         // structure containing A/D scan settings
+
+int S_Init();
+int S_Calibration();
+int S_Kill();
+int S_Core();
+
+#endif /* SENSOR_H_ */

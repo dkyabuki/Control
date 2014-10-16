@@ -1,0 +1,30 @@
+/*
+ * actuator.h
+ *
+ *  Created on: Oct 9, 2013
+ *      Author: root
+ */
+
+#ifndef ACTUATOR_H_
+#define ACTUATOR_H_
+
+#include "dscud.h"
+#include "global.h"
+
+DSCB dscb;
+BYTE channel;
+DSCDACODE output_code;
+
+BYTE result;
+DSCCB dsccb;
+ERRPARAMS errorParams;
+BYTE board_type;
+
+DSCADSETTINGS dscadsettings;    // structure containing A/D conversion settings
+DSCDACALPARAMS dscdacalparams;  // structure containing auto-calibration settings
+
+int A_Init();
+int A_Core();
+int A_Kill();
+
+#endif /* ACTUATOR_H_ */

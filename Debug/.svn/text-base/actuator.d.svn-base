@@ -1,0 +1,7 @@
+actuator.d: ../actuator.c ../actuator.h ../dscud.h ../global.h
+
+../actuator.h:
+
+../dscud.h:
+
+../global.h:

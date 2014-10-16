@@ -1,0 +1,76 @@
+10
+
+dir
+16
+svn://biomecatronica.bitnamiapp.com/installdir/repositories/controle/control/.metadata/.plugins
+svn://biomecatronica.bitnamiapp.com/installdir/repositories/controle
+
+
+
+2013-10-11T18:59:25.160272Z
+7
+bruno
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+8ec0966a-faee-11e2-9ad5-6d4a37c2ef66
+
+org.eclipse.e4.workbench
+dir
+
+org.eclipse.jdt.ui
+dir
+
+org.eclipse.ui.workbench
+dir
+
+org.eclipse.cdt.core
+dir
+
+org.eclipse.core.resources
+dir
+
+org.eclipse.rse.ui
+dir
+
+org.eclipse.mylyn.bugzilla.core
+dir
+
+org.eclipse.team.cvs.core
+dir
+
+org.eclipse.ui.intro
+dir
+
+org.eclipse.jdt.core
+dir
+
+org.eclipse.mylyn.tasks.ui
+dir
+
+org.eclipse.core.runtime
+dir
+
+org.eclipse.cdt.make.core
+dir
+
+org.eclipse.ui.ide
+dir
+
+org.eclipse.rse.core
+dir
+
+org.eclipse.mylyn.context.core
+dir
+

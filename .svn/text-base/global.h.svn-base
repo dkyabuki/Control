@@ -1,0 +1,32 @@
+#ifndef GLOBAL_H_
+#define GLOBAL_H_
+
+#define NUMBEROFTASKS 4
+
+//ID das Tasks
+#define SENSOR		1
+#define CONTROL		2
+#define ACTUATOR	3
+#define TEST		4
+
+//Conversão do Timer
+#define NS2MS 1000000 //Ns para Ms
+#define NS2US 1000    //Ns para Us
+
+//Opções iniciais
+int MONITORING;
+int SENSORING;
+
+//Valores a ser enviado do Controle para o Atuador [k-2,k-1,k]
+double SETPOINT[3];
+
+//Valores lido do Strain Gage [k-2,k-1,k]
+double TORQUE[3];
+
+//DeadZone
+double DEADZONE;
+
+//Referência de calibração
+double VOLTAGEREFERENCE;
+
+#endif /* GLOBAL_H_ */

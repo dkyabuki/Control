@@ -1,0 +1,19 @@
+#ifndef CONTROL_H_
+#define CONTROL_H_
+
+#include "global.h"
+
+//Parâmetros de controle discreto
+double a;
+double b;
+double c;
+double d;
+double e;
+
+int i;
+
+int C_Init();
+int C_Kill();
+int C_Core();
+
+#endif /* CONTROL_H_ */

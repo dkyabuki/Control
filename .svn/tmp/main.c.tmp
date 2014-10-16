@@ -1,0 +1,186 @@
+#include "tasks.h"
+
+//Declarações
+void calibracao();
+void priority();
+void period();
+void enable();
+void menu();
+void config();
+void ParametrosDasTasks();
+
+//Implementações
+void calibracao()
+{
+	int choice = 0;
+
+	while (choice!=5){
+		printf("Calibração\n");
+		printf("1. Calibração dos conversores DA\n");
+		printf("2. Calibração dos conversores AD\n");
+		printf("3. Voltar\n\n");
+
+		scanf ("%d",&choice);
+
+		if(choice==1) A_Calibration();
+		else if(choice==2) S_Calibration();
+		else if(choice==3) break;
+		else printf("Opção Inválida\n\n");
+	}
+}
+
+void priority()
+{
+	int choice = 0;
+
+	while (choice!=5){
+		printf("Prioridade das Tasks [0-100]\n");
+		printf("1. PRIORITY[SENSOR]   =  %d\n",PRIORITY[SENSOR]);
+		printf("2. PRIORITY[CONTROL]  =  %d\n",PRIORITY[CONTROL]);
+	    printf("3. PRIORITY[ACTUATOR] =  %d\n",PRIORITY[ACTUATOR]);
+		printf("4. PRIORITY[TEST]     =  %d\n",PRIORITY[TEST]);
+		printf("5. Voltar\n\n");
+
+		scanf ("%d",&choice);
+
+		if(choice==1) scanf ("%d",&PRIORITY[SENSOR]);
+		else if(choice==2) scanf ("%d",&PRIORITY[CONTROL]);
+		else if(choice==3) scanf ("%d",&PRIORITY[ACTUATOR]);
+		else if(choice==4) scanf ("%d",&PRIORITY[TEST]);
+		else if(choice==5) break;
+		else printf("Opção Inválida\n\n");
+	}
+}
+
+void period(){
+	int choice = 0;
+
+	while (choice!=5){
+		printf("Período das Tasks [ms]\n");
+		printf("1. PERIOD[SENSOR]   =  %d\n",PERIOD[SENSOR]);
+		printf("2. PERIOD[CONTROL]  =  %d\n",PERIOD[CONTROL]);
+		printf("3. PERIOD[ACTUATOR] =  %d\n",PERIOD[ACTUATOR]);
+		printf("4. PERIOD[TEST]     =  %d\n",PERIOD[TEST]);
+		printf("5. Voltar\n\n");
+
+		scanf ("%d",&choice);
+
+		if(choice==1) scanf ("%d",&PERIOD[SENSOR]);
+		else if(choice==2) scanf ("%d",&PERIOD[CONTROL]);
+		else if(choice==3) scanf ("%d",&PERIOD[ACTUATOR]);
+		else if(choice==4) scanf ("%d",&PERIOD[TEST]);
+		else if(choice==5) break;
+		else printf("Opção Inválida\n\n");
+	}
+}
+
+void enable(){
+	int choice = 0;
+
+	while (choice!=5){
+		printf("Habilita/Desabilita Task\n");
+		printf("1. ENABLETASK[SENSOR]   =  %d\n",ENABLETASK[SENSOR]);
+		printf("2. ENABLETASK[CONTROL]  =  %d\n",ENABLETASK[CONTROL]);
+		printf("3. ENABLETASK[ACTUATOR] =  %d\n",ENABLETASK[ACTUATOR]);
+		printf("4. ENABLETASK[TEST]     =  %d\n",ENABLETASK[TEST]);
+		printf("5. Voltar\n\n");
+
+		scanf ("%d",&choice);
+
+		if(choice==1) scanf ("%d",&ENABLETASK[SENSOR]);
+		else if(choice==2) scanf ("%d",&ENABLETASK[CONTROL]);
+		else if(choice==3) scanf ("%d",&ENABLETASK[ACTUATOR]);
+		else if(choice==4) scanf ("%d",&ENABLETASK[TEST]);
+		else if(choice==5) break;
+		else printf("Opção Inválida\n\n");
+	}
+}
+
+void menu(){
+	int choice = 0;
+
+	while (choice!=2){
+		//printf("Controle de Impedâncias\n");
+		//printf("1. Configurações\n");
+		//printf("2. Executar\n\n");
+
+		scanf ("%d",&choice);
+
+		if(choice==1) config();
+		if(choice!=1 && choice!=2) 	printf("Opção Inválida\n\n");
+	}
+}
+
+void config(){
+	int choice = 0;
+
+	while (choice!=3){
+		printf("Configurações\n");
+		printf("1. Parâmetros das Tasks\n");
+		printf("2. Calibração dos conversores AD/DA\n");
+		printf("3. MONITORING = %d\n",MONITORING);
+		printf("3. MONITORING = %d\n",SENSORING);
+		printf("5. Voltar\n\n");
+
+		scanf ("%d",&choice);
+
+		if(choice==1) ParametrosDasTasks();
+		else if(choice==2) calibracao();
+		else if(choice==3) scanf ("%d",&MONITORING);
+		else if(choice==4) scanf ("%d",&SENSORING);
+		else if(choice==5) break;
+		else printf("Opção Inválida\n\n");
+	}
+}
+
+void ParametrosDasTasks(){
+	int choice = 0;
+
+	while (choice!=4){
+		printf("Parâmetros das Tasks\n");
+		printf("1. Habilitar/Desabilitar\n");
+		printf("2. Período [ms]\n");
+		printf("3. Prioridade [0-100]\n");
+		printf("4. Voltar\n\n");
+
+		scanf ("%d",&choice);
+
+		if(choice==1) enable();
+		else if(choice==2) period();
+		else if(choice==3) priority();
+		else if(choice==4) {}
+		else printf("Opção Inválida\n\n");
+	}
+}
+
+int main(int argc, char* argv[]) {
+
+	A_Init();
+
+	MONITORING = 0;
+	SENSORING = 0;
+
+	T_Xenomai();
+	T_Init();
+
+	T_Create();
+	menu();
+
+	T_Start();
+	T_Kill();
+
+<<<<<<< .mine
+	sleep(30);
+//	pause();
+	printf("não funcionou");
+=======
+	sleep(30);
+	//pause();
+>>>>>>> .r15
+
+	return 0;
+}
+
+
+
+
