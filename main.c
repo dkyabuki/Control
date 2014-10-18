@@ -11,7 +11,7 @@ void calibration();
 void set_task_priority();
 void set_task_period();
 void enable_task();
-void set_zero_position();
+//void set_zero_position();
 
 int main(int argc, char* argv[])
 {
@@ -20,6 +20,7 @@ int main(int argc, char* argv[])
 	SENSORING = 0;
 	TRAJECTORY = CONTROL_ACTIVE;	//1-SINUSOIDAL_POS 2-CONSTANT 3-SINUSOIDAL_TOR 4-CONTROL_ACTIVE
 	DISCRETIZATION = TUSTIN;
+	double offsets[2];
 //	printf("Digite os parâmetros J, B e K, nesta ordem\n");
 //	scanf ("%lf", &J);
 //	scanf ("%lf", &B);
@@ -28,13 +29,14 @@ int main(int argc, char* argv[])
 	T_Init();
 	T_Create();
 
-//	printf("Calculando offset...\n");
-//	sleep(5);
-//	printf("Offset calculado: %5.8f\n", S_CalcOffset());
-//	sleep(5);
-	readingOffset = -0.048;
+	printf("Calculando offsets...\n");
+	sleep(5);
+	S_CalcOffset(offsets);
+	printf("Offsets calculados: \n  Torque: %5.8f \t Posição: %5.8f \n", offsets[0], offsets[1]);
+	sleep(5);
 
-	//set_zero_position();
+//	readingOffset = -0.098;
+
 //	if(TRAJECTORY == SINUSOIDAL_POS){
 //		send_setpoint(SET_CTE);
 //	}
@@ -285,33 +287,33 @@ void calibration()
 	}
 }
 
-void set_zero_position()
-{
-	double stack, ideal, difference, tolerance, setpoint, variation;
-	variation = 10;
-//	ideal = 3.3459;
-	ideal = 3.15;
-	tolerance = 0.005;
-	setpoint = 0;
-	int counter;
-	while(1)
-	{
-		send_setpoint(setpoint);
-		stack = 0.0;
-		for(counter = 0; counter < 100; counter++){
-			stack += read_potentiometer();
-		}
-		stack = stack/counter;
-		difference = ideal - stack;
-		if (fabs(difference) <= tolerance)
-			break;
-		else if (difference < 0)
-			setpoint += variation;
-		else
-			setpoint -= variation;
-		variation /= 2;
-		printf("%lf\t %lf\n", stack, difference);
-	}
-	printf("%lf\n", setpoint);
-	setpoint_offset = setpoint;
-}
+//void set_zero_position()
+//{
+//	double stack, ideal, difference, tolerance, setpoint, variation;
+//	variation = 10;
+////	ideal = 3.3459;
+//	ideal = 3.15;
+//	tolerance = 0.005;
+//	setpoint = 0;
+//	int counter;
+//	while(1)
+//	{
+//		send_setpoint(setpoint);
+//		stack = 0.0;
+//		for(counter = 0; counter < 100; counter++){
+//			stack += read_potentiometer();
+//		}
+//		stack = stack/counter;
+//		difference = ideal - stack;
+//		if (fabs(difference) <= tolerance)
+//			break;
+//		else if (difference < 0)
+//			setpoint += variation;
+//		else
+//			setpoint -= variation;
+//		variation /= 2;
+//		printf("%lf\t %lf\n", stack, difference);
+//	}
+//	printf("%lf\n", setpoint);
+//	setpoint_offset = setpoint;
+//}

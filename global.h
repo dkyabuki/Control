@@ -61,7 +61,5 @@ extern double J;
 extern double K;
 extern double B;
 
-//Offset do setpoint
-extern double setpoint_offset;
 
 #endif /* GLOBAL_H_ */

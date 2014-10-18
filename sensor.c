@@ -54,57 +54,40 @@ int S_Init()
 //
 ////	voltagereference = (temp+0.3273)/(-0.2093);
 //}
-double S_CalcOffset()
+void S_CalcOffset(double offsets[2])
 {
 	int i;
-	double reading_ext;
-	double sum = 0;
+	double reading_ext, reading_pot;
+	double sumtor = 0;
+	double sumpos = 0;
 	for (i = 0; i<10000; i++)
 	{
 		if( ( result = dscADScan( dscb, &dscadscan, samples ) ) != DE_NONE )
 		{
 			dscGetLastError(&errorParams);
 			fprintf( stderr, "dscADScan error: %s %s\n", dscGetErrorString(errorParams.ErrCode), errorParams.errstring );
-			return -1;
+			return;
 		}
 		if( dscADCodeToVoltage(dscb, dscadsettings, dscadscan.sample_values[0], &reading_ext) != DE_NONE)
 		{
 			dscGetLastError(&errorParams);
 			fprintf( stderr, "dscInit error: %s %s\n", dscGetErrorString(errorParams.ErrCode), errorParams.errstring );
-			return -1;
+			return;
 		}
-		sum += reading_ext;
+		sumtor += reading_ext;
+		if( dscADCodeToVoltage(dscb, dscadsettings, dscadscan.sample_values[2], &reading_pot) != DE_NONE)
+		{
+			dscGetLastError(&errorParams);
+			fprintf( stderr, "dscInit error: %s %s\n", dscGetErrorString(errorParams.ErrCode), errorParams.errstring );
+			return;
+		}
+		sumpos += reading_pot;
 		usleep(100);
 	}
-	readingOffset = sum/10000.0 - 3.24;
-	return readingOffset;
-}
-
-
-double read_potentiometer()
-{
-	double reading_pot, reading_vcc;
-	if( ( result = dscADScan( dscb, &dscadscan, samples ) ) != DE_NONE )
-	{
-		dscGetLastError(&errorParams);
-		fprintf( stderr, "dscADScan error: %s %s\n", dscGetErrorString(errorParams.ErrCode), errorParams.errstring );
-		return -1;
-	}
-
-	if( dscADCodeToVoltage(dscb, dscadsettings, dscadscan.sample_values[2], &reading_pot) != DE_NONE)
-	{
-		dscGetLastError(&errorParams);
-		fprintf( stderr, "dscInit error: %s %s\n", dscGetErrorString(errorParams.ErrCode), errorParams.errstring );
-		return -1;
-	}
-
-	if( dscADCodeToVoltage(dscb, dscadsettings, dscadscan.sample_values[1], &reading_vcc) != DE_NONE)
-	{
-		dscGetLastError(&errorParams);
-		fprintf( stderr, "dscInit error: %s %s\n", dscGetErrorString(errorParams.ErrCode), errorParams.errstring );
-		return -1;
-	}
-	return ((reading_vcc-reading_pot)*5.00/reading_vcc);
+	readingOffset = sumtor/10000.0 - 3.24;
+	potentiometerOffset = 62.9774*sumpos/10000.0;
+	offsets[0] = readingOffset;
+	offsets[1] = potentiometerOffset;
 }
 
 int S_Calibration(){
@@ -248,7 +231,7 @@ int S_Core()
 			}
 
 			//potenciometro_atual = (voltage-voltagepot)*5.0/voltage;
-			potentiometer_reading = 62.9774*voltagepot - 164.6252;
+			potentiometer_reading = 62.9774*voltagepot - potentiometerOffset;
 			rt_printf("\t%5.8f \t%5.8f \t", torque-readingOffset, potentiometer_reading);
 			if(k >= 0 && k < 16000){ 	//salva
 //			if(k > 2 && k <= 1002){
