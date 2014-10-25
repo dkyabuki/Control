@@ -6,35 +6,20 @@ int A_Init()
     return 0;
 }
 
-void send_setpoint(double value)
-{
-	dscDAConvert(dscb, channel , (int)4095*((value+20)/40));
-	sleep(2);
-}
-
 int A_Calibration()
 {
-	rt_printf( "Calibração dos conversores DA... \n\n" );
-
-    memset(&dsccb, 0, sizeof(DSCCB));
-    dsccb.base_address = 0x300;
-    dsccb.int_level = 3;
-
-	dsccb.boardtype = DSC_DMM16AT;
-	dsccb.dma_level = 1;
-	dsccb.clock_freq = 10000000;
-
+	DSCDACALPARAMS dscdacalparams;
 	memset(&dscdacalparams, 0, sizeof(DSCDACALPARAMS));
 	dscdacalparams.darange = 65535;
 
-	if( ( result = dscDAAutoCal( dscb, &dscdacalparams ) ) != DE_NONE )
+	if( ( dscDAAutoCal( dscb, &dscdacalparams ) ) != DE_NONE )
 	{
 		dscGetLastError(&errorParams);
 		rt_printf("dscDAAutoCal error: %s %s\n", dscGetErrorString(errorParams.ErrCode), errorParams.errstring );
 		return 0;
 	}
 
-	if( ( result = dscDACalVerify( dscb, &dscdacalparams ) ) != DE_NONE )
+	if( ( dscDACalVerify( dscb, &dscdacalparams ) ) != DE_NONE )
 	{
 		dscGetLastError(&errorParams);
 		rt_printf("dscDACalVerify error: %s %s\n", dscGetErrorString(errorParams.ErrCode), errorParams.errstring );
@@ -49,7 +34,6 @@ int A_Calibration()
 	else rt_printf( "Values for offset and gain met specified tolerance\n" );
 
 	rt_printf("Calibração dos conversores DA... COMPLETA\n\n" );
-
 	return 0;
 }
 
@@ -68,3 +52,8 @@ int A_Core()
 	return 0;
 }
 
+void send_setpoint(double value)
+{
+	dscDAConvert(dscb, channel , (int)4095*((value+20)/40));
+	sleep(2);
+}

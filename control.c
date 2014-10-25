@@ -22,9 +22,9 @@ int C_Init()
 //	e = 0.923116346386636;
 
 	Tsample = 0.002;
-	J = 0.000001*0.112;
-	B = 0.000001*2.5365;
-	K = 0.000001*8.6590;
+	J = 0.0000001*0.112;
+	B = 0.0000001*2.5365;
+	K = 0.0000001*8.6590;
 
 //	K = 1;
 //	B = pow(cos(beta), 2)*K*Ts/2;
@@ -73,6 +73,14 @@ int C_Kill()
 
 int C_Core()
 {
+	TORQUE[0] = TORQUE[1];
+	TORQUE[1] = TORQUE[2];
+	TORQUE[2] = (torque_reading-extensometerOffset-3.198)/(-0.0865);
+
+	POSITION[0] = POSITION[1];
+	POSITION[1] = POSITION[2];
+	POSITION[2] = 62.9774*position_reading - potentiometerOffset;
+
 	if(TRAJECTORY == SINUSOIDAL_POS){			//senoidal
 		trajectory_time += 2;
 //		SETPOINT[2] = 2.5656 + 0.3190*sin(2*M_PI*trajectory_time/TRAJ_PERIOD);
@@ -91,6 +99,7 @@ int C_Core()
 	//	position = position/c;
 
 
+
 		if(DISCRETIZATION == TUSTIN)
 		{
 			setpoint = c*TORQUE[2]+b*TORQUE[1]+a*TORQUE[0]-e*POSITION[1]-f*POSITION[0];
@@ -98,7 +107,7 @@ int C_Core()
 		}
 		else if (DISCRETIZATION == BACKWARD_DIFF)
 		{
-			setpoint = a*TORQUE[0]-e*POSITION[1]-f*POSITION[0];
+			setpoint = a*TORQUE[2]-e*POSITION[1]-f*POSITION[0];
 			setpoint = setpoint/d;
 		}
 

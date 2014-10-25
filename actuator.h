@@ -14,13 +14,10 @@
 BYTE channel;
 DSCDACODE output_code;
 
-BYTE result;
-DSCDACALPARAMS dscdacalparams;  // structure containing auto-calibration settings
-
 int A_Init();
 int A_Calibration();
 int A_Core();
 int A_Kill();
-void send_setpoint(double value);
+void send_setpoint(double value);		//value em graus
 
 #endif /* ACTUATOR_H_ */

@@ -6,29 +6,34 @@ void T_Init()
 	pfunction[SENSOR]    = S_Core;
 	pfunction[CONTROL]   = C_Core;
 	pfunction[ACTUATOR]  = A_Core;
+	pfunction[COMM]  	 = Comm_Core;
 	pfunction[TEST]      = T_Test;
 
 	//Habilita/Desabilita Task
 	ENABLETASK[SENSOR]   = TRUE;
 	ENABLETASK[CONTROL]  = TRUE;
 	ENABLETASK[ACTUATOR] = TRUE;
+	ENABLETASK[COMM] 	 = TRUE;
 	ENABLETASK[TEST] 	 = FALSE;
 
 	//Período das Tasks [ms]
 	PERIOD[SENSOR]   = 2;
 	PERIOD[CONTROL]  = 2;
 	PERIOD[ACTUATOR] = 2;
+	PERIOD[COMM] 	 = 2;
 	PERIOD[TEST] 	 = 2;
 
 	//Prioridade das Tasks [0-100]
 	PRIORITY[SENSOR]   = 50;
 	PRIORITY[CONTROL]  = 50;
 	PRIORITY[ACTUATOR] = 50;
+	PRIORITY[COMM] 	   = 20;
 	PRIORITY[TEST] 	   = 50;
 
 	A_Init();
 	C_Init();
 	S_Init();
+	Comm_Init();
 }
 
 void T_Kill()
@@ -50,10 +55,11 @@ void T_Xenomai()
 
 void T_Create()
 {
-	rt_task_create(&TaskSensor,   "Sensor  ", 0, PRIORITY[SENSOR], 0);
-	rt_task_create(&TaskControl,  "Controle", 0, PRIORITY[CONTROL], 0);
-	rt_task_create(&TaskActuator, "Atuador ", 0, PRIORITY[ACTUATOR], 0);
-	rt_task_create(&TaskTest,     "Teste   ", 0, PRIORITY[TEST], 0);
+	rt_task_create(&TaskSensor, "Sensor", 0, PRIORITY[SENSOR], 0);
+	rt_task_create(&TaskControl, "Controle", 0, PRIORITY[CONTROL], 0);
+	rt_task_create(&TaskActuator, "Atuador", 0, PRIORITY[ACTUATOR], 0);
+	rt_task_create(&TaskComm, "Comunicação", 0, PRIORITY[COMM], 0);
+	rt_task_create(&TaskTest, "Teste", 0, PRIORITY[TEST], 0);
 }
 
 void T_Start()
@@ -74,11 +80,20 @@ void T_Start()
 		rt_task_start(&TaskTest, &T_Monitor, TEST);
 }
 
+void Start_Comm()
+{
+	if (ENABLETASK[COMM]) {
+//		Comm_Init();
+		rt_task_start(&TaskComm, &T_Monitor, COMM);
+	}
+}
+
 void T_CleanUp (void)
 {
 	rt_task_delete(&TaskControl);
 	rt_task_delete(&TaskSensor);
 	rt_task_delete(&TaskActuator);
+	rt_task_delete(&TaskComm);
 	rt_task_delete(&TaskTest);
 }
 

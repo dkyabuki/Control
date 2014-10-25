@@ -8,9 +8,11 @@ int S_Init()
 	TORQUE[0] = 0;
 	TORQUE[1] = 0;
 	TORQUE[2] = 0;
-	k=0;
-	readingOffset = 0;
-	file = fopen("teste_hum_2_1210.txt","w");
+	POSITION[0] = 0;
+	POSITION[1] = 0;
+	POSITION[2] = 0;
+	extensometerOffset = 0;
+	potentiometerOffset = 0;
 
 	//inicializa as configuracoes do conversor AD
 	memset(&dscadsettings, 0, sizeof(DSCADSETTINGS)); //zera valores de dscadsettings
@@ -35,26 +37,7 @@ int S_Init()
 	return 0;
 }
 
-//void set_reference_voltage ()
-//{
-//	double temp;
-//	if( ( result = dscADScan( dscb, &dscadscan, samples ) ) != DE_NONE )
-//	{
-//		dscGetLastError(&errorParams);
-//		fprintf( stderr, "dscADScan error: %s %s\n", dscGetErrorString(errorParams.ErrCode), errorParams.errstring );
-//		return;
-//	}
-//
-//	if( dscADCodeToVoltage(dscb, dscadsettings, dscadscan.sample_values[0], &temp) != DE_NONE)
-//	{
-//		dscGetLastError(&errorParams);
-//		fprintf( stderr, "dscInit error: %s %s\n", dscGetErrorString(errorParams.ErrCode), errorParams.errstring );
-//		return;
-//	}
-//
-////	voltagereference = (temp+0.3273)/(-0.2093);
-//}
-void S_CalcOffset(double offsets[2])
+void S_CalcOffset()
 {
 	int i;
 	double reading_ext, reading_pot;
@@ -84,10 +67,26 @@ void S_CalcOffset(double offsets[2])
 		sumpos += reading_pot;
 		usleep(100);
 	}
-	readingOffset = sumtor/10000.0 - 3.24;
+	extensometerOffset = sumtor/10000.0 - 3.198; //3.24
 	potentiometerOffset = 62.9774*sumpos/10000.0;
-	offsets[0] = readingOffset;
-	offsets[1] = potentiometerOffset;
+}
+
+double S_getTorque()
+{
+	double reading_ext;
+	if( ( result = dscADScan( dscb, &dscadscan, samples ) ) != DE_NONE )
+	{
+		dscGetLastError(&errorParams);
+		fprintf( stderr, "dscADScan error: %s %s\n", dscGetErrorString(errorParams.ErrCode), errorParams.errstring );
+		return -1;
+	}
+	if( dscADCodeToVoltage(dscb, dscadsettings, dscadscan.sample_values[0], &reading_ext) != DE_NONE)
+	{
+		dscGetLastError(&errorParams);
+		fprintf( stderr, "dscInit error: %s %s\n", dscGetErrorString(errorParams.ErrCode), errorParams.errstring );
+		return -1;
+	}
+	return (reading_ext);
 }
 
 int S_Calibration(){
@@ -138,50 +137,34 @@ int S_Calibration(){
 
 int S_Kill()
 {
-	dscFree();
+	free(samples);
 	return 0;
 }
 
 int S_Core()
 {
 //	clock_gettime(CLOCK_REALTIME, &start);
-	DFLOAT potentiometer_reading;
-	DFLOAT voltage;
-	int i;
-//	double fc = 5;
-	double torque;
-//	double deadzone = 0.04;
+//	double deadzone = 0.2;
 
 	if( ( result = dscADScan( dscb, &dscadscan, samples ) ) != DE_NONE )
-		{
+	{
 		dscGetLastError(&errorParams);
 		fprintf( stderr, "dscADScan error: %s %s\n", dscGetErrorString(errorParams.ErrCode), errorParams.errstring );
-		free( samples ); // remember to deallocate malloc() memory
+		free( samples );
 		return 0;
 	}
 
-	//if (SENSORING) rt_printf( "\nActual voltages:" );
-
+	int i;
 	for( i = 0; i < (dscadscan.high_channel - dscadscan.low_channel)+ 1; i++)
 	{
-		if( dscADCodeToVoltage(dscb, dscadsettings, dscadscan.sample_values[i], &voltage) != DE_NONE)
+		if (i == 0)				//TORQUE
 		{
-			dscGetLastError(&errorParams);
-			fprintf( stderr, "dscInit error: %s %s\n", dscGetErrorString(errorParams.ErrCode), errorParams.errstring );
-			free(samples);
-			return 0;
-		}
-
-		if (SENSORING) rt_printf(" %5.3lfV, i=%d", voltage, i);
-		if (i==0)
-		{
-			//DEADZONE = .04;
-
-
-			TORQUE[0] = TORQUE[1];
-			TORQUE[1] = TORQUE[2];
-			torque = voltage;
-
+			if( dscADCodeToVoltage(dscb, dscadsettings, dscadscan.sample_values[i], &torque_reading) != DE_NONE)
+			{
+				dscGetLastError(&errorParams);
+				fprintf( stderr, "dscInit error: %s %s\n", dscGetErrorString(errorParams.ErrCode), errorParams.errstring );
+				return 0;
+			}
 			/*
 			//DEADZONE
 			torque = (voltage-voltagereference);
@@ -197,79 +180,39 @@ int S_Core()
 					else if (TORQUE[1]-torque>=deadzone)
 						TORQUE[2]=torque;
 					else TORQUE[2]=TORQUE[1];
-			*/
-//			if(voltage<=-deadzone || voltage>=deadzone){
+
+//			if(voltage<=readingOffset-deadzone || voltage>=readingOffset+deadzone){
 //				torque = voltage;
-//				TORQUE[2]=(torque-readingOffset-3.2368)/(-0.0865);
+//				TORQUE[2]=(torque-readingOffset-3.198)/(-0.0865);
 //			} else {
 //				TORQUE[2] = 0;//torque;
 //			}
 
 
-			if (TRAJECTORY == 3){
-				osc_time += 2;
-				TORQUE[2]=0.1*sin(2*M_PI*osc_time/OSC_PERIOD);
-			}else{
-//				TORQUE[2]=torque;
-				TORQUE[2]=(torque-readingOffset-3.2368)/(-0.0865);
+//			if (TRAJECTORY == 3){
+//				osc_time += 2;
+//				TORQUE[2]=0.1*sin(2*M_PI*osc_time/OSC_PERIOD);
+//			}else{
 //				TORQUE[2]=(torque+0.3273)/(-0.2093);
+//				TORQUE[2]=(torque-extensometerOffset-3.198)/(-0.0865);
 //				TORQUE[2]=(torque+0.0058)/(-0.0693);
-			}
+//			}
+			*/
 
-//					TORQUE[2] = TORQUE[1]*(1-0.002*2*M_PI*fc) + torque*(0.002*2*M_PI*fc);
-
-			if (SENSORING) printf("\n Torque: %5.3lfNm %5.3lfNm %5.3lfNm", TORQUE[0], TORQUE[1], TORQUE[2]);
-
-		} else if (i == 1) {
-			double voltagepot;
-			if( dscADCodeToVoltage(dscb, dscadsettings, dscadscan.sample_values[i+1], &voltagepot) != DE_NONE)
+		} else if (i == 1) 		//POSITION
+		{
+			if( dscADCodeToVoltage(dscb, dscadsettings, dscadscan.sample_values[i+1], &position_reading) != DE_NONE)
 			{
 				dscGetLastError(&errorParams);
 				fprintf( stderr, "dscInit error: %s %s\n", dscGetErrorString(errorParams.ErrCode), errorParams.errstring );
 				free(samples);
 				return 0;
 			}
-
-			//potenciometro_atual = (voltage-voltagepot)*5.0/voltage;
-			potentiometer_reading = 62.9774*voltagepot - potentiometerOffset;
-			rt_printf("\t%5.8f \t%5.8f \t", torque-readingOffset, potentiometer_reading);
-			if(k >= 0 && k < 16000){ 	//salva
-//			if(k > 2 && k <= 1002){
-				saveToFile (file, torque);
-				rt_printf("\t%d\n", k);
-				k++;
-			} else if(k == 16000){ 		//para
-//			} else if(k == 1003){
-				rt_printf("\t%d\n", k);
-				closeFile(file);
-				k++;
-//			} else if(k <= 0){ 			//wait
-//				rt_printf("\t%d \tWAITING!\n", k);
-//				k++;
-			} else { 					//finish
-				rt_printf("\tDONE!\n");
-			}
-			POSITION[0] = POSITION[1];
-			POSITION[1] = POSITION[2];
-			POSITION[2] = potentiometer_reading;
-		}
-
-
+		} else
+			break;
 	}
 //	clock_gettime(CLOCK_REALTIME, &end);
 //	double timespent = ( end.tv_sec-start.tv_sec ) + ( end.tv_nsec-start.tv_nsec )/BILLION;
 //	rt_printf("\t%5.8f \n", timespent*1000.00);
 	return 0;
-}
-
-void saveToFile (FILE *f, double tor){
-	if (file != NULL){
-		fprintf(f, "%5.8f, %5.8f, %5.8f, %5.8f,\n", TORQUE[2], POSITION[2], setpoint, tor);
-	}
-}
-
-void closeFile (FILE *f){
-	if (file != NULL){
-		fclose(f);
-	}
 }

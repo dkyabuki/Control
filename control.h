@@ -21,12 +21,12 @@ double d;
 double e;
 double f;
 
-double a0;
-double a1;
-double a2;
-double b0;
-double b1;
-double b2;
+//double a0;
+//double a1;
+//double a2;
+//double b0;
+//double b1;
+//double b2;
 
 double trajectory_time;
 

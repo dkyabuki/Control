@@ -1,4 +1,4 @@
-main.d: ../main.c ../tasks.h ../global.h ../include.h \
+comm.d: ../comm.c ../comm.h ../global.h ../include.h \
  /usr/include/xenomai/native/task.h /usr/include/xenomai/nucleus/sched.h \
  /usr/include/xenomai/nucleus/thread.h \
  /usr/include/xenomai/nucleus/types.h \
@@ -21,10 +21,9 @@ main.d: ../main.c ../tasks.h ../global.h ../include.h \
  /usr/include/xenomai/native/types.h /usr/include/xenomai/native/timer.h \
  /usr/include/xenomai/native/heap.h /usr/include/xenomai/nucleus/synch.h \
  /usr/include/xenomai/nucleus/queue.h /usr/include/xenomai/nucleus/heap.h \
- /usr/include/xenomai/rtdk.h ../dscud.h ../control.h ../sensor.h \
- ../actuator.h ../comm.h
+ /usr/include/xenomai/rtdk.h ../dscud.h
 
-../tasks.h:
+../comm.h:
 
 ../global.h:
 
@@ -85,11 +84,3 @@ main.d: ../main.c ../tasks.h ../global.h ../include.h \
 /usr/include/xenomai/rtdk.h:
 
 ../dscud.h:
-
-../control.h:
-
-../sensor.h:
-
-../actuator.h:
-
-../comm.h:

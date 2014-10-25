@@ -9,9 +9,14 @@ double J;
 double K;
 double B;
 
+//saída do controle
 double setpoint;
 
-double setpoint_offset;
+//entrada do controle
+double position_reading;
+double torque_reading;
 
+double potentiometerOffset;
+double extensometerOffset;
 DSCB dscb;
 DSCCB dsccb;

@@ -27,13 +27,9 @@ struct timespec start;
 struct timespec end;
 
 //Sensor reading
-double readingOffset;
-double potentiometerOffset;
 double osc_time;
 
-//File management
-FILE *file;
-int k;
+
 
 /******************************************************/
 /*                     FUNCTIONS                      */
@@ -46,10 +42,7 @@ int S_Core();
 
 //Tool functions
 //void set_reference_voltage();
-void S_CalcOffset(double offsets[2]);
-
-//File management functions
-void saveToFile (FILE *f, double tor);
-void closeFile (FILE *f);
+void S_CalcOffset();
+double S_getTorque();
 
 #endif /* SENSOR_H_ */

@@ -6,7 +6,7 @@
 /******************************************************************/
 /*                         DEFINES                                */
 /******************************************************************/
-#define NUMBEROFTASKS 4
+#define NUMBEROFTASKS 5
 
 /******************************************************************/
 /*                        CONVENÇÕES                              */
@@ -15,7 +15,8 @@
 #define SENSOR		0
 #define CONTROL		1
 #define ACTUATOR	2
-#define TEST		3
+#define COMM		3
+#define TEST		4
 
 //Valores para a variável DISCRETIZATION
 #define TUSTIN 				1
@@ -34,6 +35,7 @@
 #define NS2MS 1000000 //Ns para Ms
 #define NS2US 1000    //Ns para Us
 
+
 /******************************************************************/
 /*                    VARIÁVEIS GLOBAIS                           */
 /******************************************************************/
@@ -48,18 +50,24 @@ extern short int SENSORING;
 extern short int TRAJECTORY;
 extern short int DISCRETIZATION;
 
+//saida do controle
 extern double setpoint;
 
-//Valores a ser enviado do Controle para o Atuador [k-2,k-1,k]
-double POSITION[3];
-
-//Valores lido do Strain Gage [k-2,k-1,k]
-double TORQUE[3];
+//entrada do controle
+extern double torque_reading;
+extern double position_reading;
 
 //Parâmetros do controlador
 extern double J;
 extern double K;
 extern double B;
 
+//Offsets dos sensores
+extern double extensometerOffset;
+extern double potentiometerOffset;
+
+//Valores armazenados para o controle
+double POSITION[3];
+double TORQUE[3];
 
 #endif /* GLOBAL_H_ */

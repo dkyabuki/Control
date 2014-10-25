@@ -22,7 +22,7 @@ tasks.d: ../tasks.c ../tasks.h ../global.h ../include.h \
  /usr/include/xenomai/native/heap.h /usr/include/xenomai/nucleus/synch.h \
  /usr/include/xenomai/nucleus/queue.h /usr/include/xenomai/nucleus/heap.h \
  /usr/include/xenomai/rtdk.h ../dscud.h ../control.h ../sensor.h \
- ../actuator.h
+ ../actuator.h ../comm.h
 
 ../tasks.h:
 
@@ -91,3 +91,5 @@ tasks.d: ../tasks.c ../tasks.h ../global.h ../include.h \
 ../sensor.h:
 
 ../actuator.h:
+
+../comm.h:

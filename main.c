@@ -19,8 +19,8 @@ int main(int argc, char* argv[])
 	MONITORING = 0;
 	SENSORING = 0;
 	TRAJECTORY = CONTROL_ACTIVE;	//1-SINUSOIDAL_POS 2-CONSTANT 3-SINUSOIDAL_TOR 4-CONTROL_ACTIVE
-	DISCRETIZATION = TUSTIN;
-	double offsets[2];
+	DISCRETIZATION = BACKWARD_DIFF;
+
 //	printf("Digite os parâmetros J, B e K, nesta ordem\n");
 //	scanf ("%lf", &J);
 //	scanf ("%lf", &B);
@@ -29,19 +29,21 @@ int main(int argc, char* argv[])
 	T_Init();
 	T_Create();
 
+	send_setpoint(SET_CTE);
+	sleep(5);
 	printf("Calculando offsets...\n");
+	S_CalcOffset();
+	printf("Offsets calculados: \n  Torque: %5.8f \t Posição: %5.8f \n", potentiometerOffset, extensometerOffset);
 	sleep(5);
-	S_CalcOffset(offsets);
-	printf("Offsets calculados: \n  Torque: %5.8f \t Posição: %5.8f \n", offsets[0], offsets[1]);
-	sleep(5);
+	printf("Iniciando a comunicação...\n");
+//	Start_Comm();
 
 //	readingOffset = -0.098;
 
 //	if(TRAJECTORY == SINUSOIDAL_POS){
 //		send_setpoint(SET_CTE);
 //	}
-	send_setpoint(SET_CTE);
-	sleep(2);
+
 //	else
 //	{
 //		send_setpoint(2.5656);
@@ -50,6 +52,7 @@ int main(int argc, char* argv[])
 
 	menu();
 	T_Start();
+	Start_Comm();
 	pause();
 	T_Kill();
 	return 0;
@@ -57,8 +60,10 @@ int main(int argc, char* argv[])
 
 void initBoard()
 {
+	dsccb.boardtype = DSC_DMM16AT;
 	dsccb.base_address=0x300;		//endereço de base da placa
 	dsccb.int_level = 7;			//nível de interrupção
+	dsccb.clock_freq = 10000000;
 
 	//Inicializa a biblioteca dscud
 	if( dscInit( DSC_VERSION ) != DE_NONE )

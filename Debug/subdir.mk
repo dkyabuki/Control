@@ -5,6 +5,7 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
 ../actuator.c \
+../comm.c \
 ../control.c \
 ../global.c \
 ../main.c \
@@ -13,6 +14,7 @@ C_SRCS += \
 
 OBJS += \
 ./actuator.o \
+./comm.o \
 ./control.o \
 ./global.o \
 ./main.o \
@@ -21,6 +23,7 @@ OBJS += \
 
 C_DEPS += \
 ./actuator.d \
+./comm.d \
 ./control.d \
 ./global.d \
 ./main.d \
