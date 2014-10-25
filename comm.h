@@ -6,7 +6,9 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <sys/types.h>
+#include <arpa/inet.h>
 
+#define SERVER "127.0.0.1"
 
 /******************************************************/
 /*                  TASK VARIABLES                    */

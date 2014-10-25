@@ -30,13 +30,12 @@ int main(int argc, char* argv[])
 	T_Create();
 
 	send_setpoint(SET_CTE);
-	sleep(5);
 	printf("Calculando offsets...\n");
+	sleep(5);
 	S_CalcOffset();
 	printf("Offsets calculados: \n  Torque: %5.8f \t Posição: %5.8f \n", potentiometerOffset, extensometerOffset);
-	sleep(5);
-	printf("Iniciando a comunicação...\n");
-//	Start_Comm();
+	printf("Iniciando a comunicação\n");
+	Start_Comm();
 
 //	readingOffset = -0.098;
 
