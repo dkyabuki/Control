@@ -11,6 +11,7 @@ void calibration();
 void set_task_priority();
 void set_task_period();
 void enable_task();
+int waitForUser ();
 //void set_zero_position();
 
 int main(int argc, char* argv[])
@@ -35,7 +36,7 @@ int main(int argc, char* argv[])
 	S_CalcOffset();
 	printf("Offsets calculados: \n  Torque: %5.8f \t Posição: %5.8f \n", potentiometerOffset, extensometerOffset);
 	printf("Iniciando a comunicação\n");
-	Start_Comm();
+//	Start_Comm();
 
 //	readingOffset = -0.098;
 
@@ -51,7 +52,13 @@ int main(int argc, char* argv[])
 
 	menu();
 	T_Start();
-	Start_Comm();
+	sleep(1);
+	waitForUser();
+	waitForUser();
+	startSaving();
+	waitForUser();
+	finishSaving();
+
 	pause();
 	T_Kill();
 	return 0;
@@ -321,3 +328,18 @@ void calibration()
 //	printf("%lf\n", setpoint);
 //	setpoint_offset = setpoint;
 //}
+
+int waitForUser ()
+{
+  int ch;
+  struct termios oldt, newt;
+
+  tcgetattr ( STDIN_FILENO, &oldt );
+  newt = oldt;
+  newt.c_lflag &= ~( ICANON | ECHO );
+  tcsetattr ( STDIN_FILENO, TCSANOW, &newt );
+  ch = getchar();
+  tcsetattr ( STDIN_FILENO, TCSANOW, &oldt );
+
+  return ch;
+}

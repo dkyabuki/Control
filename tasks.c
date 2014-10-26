@@ -27,7 +27,7 @@ void T_Init()
 	PRIORITY[SENSOR]   = 50;
 	PRIORITY[CONTROL]  = 50;
 	PRIORITY[ACTUATOR] = 50;
-	PRIORITY[COMM] 	   = 20;
+	PRIORITY[COMM] 	   = 50;
 	PRIORITY[TEST] 	   = 50;
 
 	A_Init();
@@ -75,6 +75,10 @@ void T_Start()
 	if (ENABLETASK[ACTUATOR]) {
 //		A_Init();
 		rt_task_start(&TaskActuator, &T_Monitor, ACTUATOR);
+	}
+	if (ENABLETASK[COMM]) {
+//		Comm_Init();
+		rt_task_start(&TaskComm, &T_Monitor, COMM);
 	}
 	if (ENABLETASK[TEST])
 		rt_task_start(&TaskTest, &T_Monitor, TEST);
