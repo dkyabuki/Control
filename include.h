@@ -5,6 +5,8 @@
 #include <signal.h>
 #include <string.h>
 #include <unistd.h>
+#include <termios.h>
+#include <fcntl.h>
 #include <stdlib.h>
 #include <math.h>
 #include <sys/mman.h>

@@ -8,6 +8,7 @@ short int DISCRETIZATION;
 double J;
 double K;
 double B;
+double coef;
 
 //saída do controle
 double setpoint;

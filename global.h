@@ -27,6 +27,7 @@
 #define CONSTANT			2
 #define SINUSOIDAL_TOR		3
 #define CONTROL_ACTIVE		4
+#define RANDOM_EXCITATION	5
 
 /******************************************************************/
 /*                        CONVERSÕES                              */
@@ -61,6 +62,7 @@ extern double position_reading;
 extern double J;
 extern double K;
 extern double B;
+extern double coef;
 
 //Offsets dos sensores
 extern double extensometerOffset;

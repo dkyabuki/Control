@@ -1,0 +1,152 @@
+commit f6d996c8cb442e1c4947fad56cac88b7d1abf290
+Author: Biometron <dkyabuki@hotmail.com>
+Date:   Sat Oct 25 20:26:42 2014 -0200
+
+    testado o envio de mensagens por udp
+
+diff --git a/Debug/comm.o b/Debug/comm.o
+index 2651790..da40dd1 100644
+Binary files a/Debug/comm.o and b/Debug/comm.o differ
+diff --git a/Debug/control b/Debug/control
+index 4ddd5df..868aece 100755
+Binary files a/Debug/control and b/Debug/control differ
+diff --git a/Debug/main.o b/Debug/main.o
+index 9bc65b2..fd6aa31 100644
+Binary files a/Debug/main.o and b/Debug/main.o differ
+diff --git a/Debug/tasks.o b/Debug/tasks.o
+index c67802e..7448fbf 100644
+Binary files a/Debug/tasks.o and b/Debug/tasks.o differ
+diff --git a/comm.c b/comm.c
+index b1d768d..da873f1 100644
+--- a/comm.c
++++ b/comm.c
+@@ -2,47 +2,86 @@
+ 
+ int Comm_Init()
+ {
+-	if(( socketId = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
++	printf("Inicializando socket para comunicação...\n");
++	if(( socketId = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
+ 	{
+ 		perror("Cannot create socket");
+ 		return 0;
+ 	}
++	printf("Concluído!\n");
++	printf("Configurando endereço IP e porta para comunicação UDP...\n");
+ 	memset((char *)&address, 0, sizeof(address));
+ 	address.sin_family = AF_INET;
+-	address.sin_addr.s_addr = htonl(INADDR_ANY);
+-	address.sin_port = htons(0);
++	address.sin_port = htons(45454);
++
++	if(inet_aton(SERVER, &address.sin_addr) == -1)
++	{
++		perror("inet_aton failed");
++		return 0;
++	}
++	printf("Concluído!\n");
++	printf("Conectando socket ao endereço fornecido...\n");
+ 	if(bind(socketId, (struct sockaddr *)&address, sizeof(address)) < 0)
+ 	{
+ 		perror("Bind failed");
+ 		return 0;
+ 	}
++	printf("Concluído!\n");
++	printf("Enviando mensagem de teste...\n");
+ 	message = (struct commdata *)(malloc(sizeof(struct commdata)));
+-	message->type = 0;
+ 	message->position = 0;
+ 	message->torque = 0;
++	message->type = 0;
+ 	message->time = 0;
+-	if(sendto(socketId, (char *)message, sizeof(message), 0, (struct sockaddr *)&address, sizeof(address)) < 0)
++	if(sendto(socketId, message, sizeof(message), 0, (struct sockaddr *)&address, sizeof(address)) < 0)
+ 	{
+-		perror("sento failed");
++		perror("sendto failed");
++		return 0;
++	}
++	printf("Concluído!\n");
++	printf("Abrindo stream de arquivo para armazenamento de dados...\n");
++	if((file = fopen("new_test.txt","w")) == NULL)
++	{
++		printf("Não foi possível abrir o arquivo!");
+ 		return 0;
+ 	}
+-	file = fopen("new_test.txt","w");
++	printf("Concluído!\n");
++	printf("A configuração da comunicação UDP foi concluída!\n");
++
+ 	lineCount = 0;
+ 	return 0;
+ }
+ 
+ int Comm_Kill()
+ {
++	free(message);
+ 	return 0;
+ }
+ 
+ int Comm_Core()
+ {
++	memset((char *)message, 0, sizeof(message));
+ 	message->type = 1;
+ 	message->position = POSITION[2];
+ 	message->torque = TORQUE[2];
+ 	message->time = 0;
+-	if(sendto(socketId, (char *)message, sizeof(message), 0, (struct sockaddr *)&address, sizeof(address)) < 0)
++//	char *aux;
++//	aux = message;
++//	char *code;
++//	code = malloc(3);
++//	code = "01";
++//	memcpy(aux, code, strlen(code));
++//	aux += 2;
++//	*aux = '|';
++//	aux++;
++//	memcpy(aux, &POSITION[2], sizeof(double));
++//	aux += sizeof(double);
++//	*aux = '|';
++//	aux++;
++//	memcpy(aux, &TORQUE[2], sizeof(double));
++//	aux += sizeof(double);
++
++	if(sendto(socketId, message, sizeof(message), 0, (struct sockaddr *)&address, sizeof(address)) < 0)
+ 	{
+ 		perror("sendto failed");
+ 		return 0;
+diff --git a/comm.h b/comm.h
+index 1bb5693..6a00aac 100644
+--- a/comm.h
++++ b/comm.h
+@@ -6,7 +6,9 @@
+ #include <sys/socket.h>
+ #include <netinet/in.h>
+ #include <sys/types.h>
++#include <arpa/inet.h>
+ 
++#define SERVER "127.0.0.1"
+ 
+ /******************************************************/
+ /*                  TASK VARIABLES                    */
+diff --git a/main.c b/main.c
+index 8b80834..6f9ddfb 100644
+--- a/main.c
++++ b/main.c
+@@ -30,13 +30,12 @@ int main(int argc, char* argv[])
+ 	T_Create();
+ 
+ 	send_setpoint(SET_CTE);
+-	sleep(5);
+ 	printf("Calculando offsets...\n");
++	sleep(5);
+ 	S_CalcOffset();
+ 	printf("Offsets calculados: \n  Torque: %5.8f \t Posição: %5.8f \n", potentiometerOffset, extensometerOffset);
+-	sleep(5);
+-	printf("Iniciando a comunicação...\n");
+-//	Start_Comm();
++	printf("Iniciando a comunicação\n");
++	Start_Comm();
+ 
+ //	readingOffset = -0.098;
+ 

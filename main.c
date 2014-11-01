@@ -11,6 +11,7 @@ void calibration();
 void set_task_priority();
 void set_task_period();
 void enable_task();
+int waitForUser ();
 //void set_zero_position();
 
 int main(int argc, char* argv[])
@@ -20,7 +21,8 @@ int main(int argc, char* argv[])
 	SENSORING = 0;
 	TRAJECTORY = CONTROL_ACTIVE;	//1-SINUSOIDAL_POS 2-CONSTANT 3-SINUSOIDAL_TOR 4-CONTROL_ACTIVE
 	DISCRETIZATION = BACKWARD_DIFF;
-
+	printf("Digite o valor do multiplicador c: ");
+	scanf ("%lf", &coef);
 //	printf("Digite os parâmetros J, B e K, nesta ordem\n");
 //	scanf ("%lf", &J);
 //	scanf ("%lf", &B);
@@ -35,7 +37,7 @@ int main(int argc, char* argv[])
 	S_CalcOffset();
 	printf("Offsets calculados: \n  Torque: %5.8f \t Posição: %5.8f \n", potentiometerOffset, extensometerOffset);
 	printf("Iniciando a comunicação\n");
-	Start_Comm();
+//	Start_Comm();
 
 //	readingOffset = -0.098;
 
@@ -51,7 +53,12 @@ int main(int argc, char* argv[])
 
 	menu();
 	T_Start();
-	Start_Comm();
+	sleep(1);
+	waitForUser();
+	waitForUser();
+	startSaving();
+	waitForUser();
+	finishSaving();
 	pause();
 	T_Kill();
 	return 0;
@@ -321,3 +328,18 @@ void calibration()
 //	printf("%lf\n", setpoint);
 //	setpoint_offset = setpoint;
 //}
+
+int waitForUser ()
+{
+  int ch;
+  struct termios oldt, newt;
+
+  tcgetattr ( STDIN_FILENO, &oldt );
+  newt = oldt;
+  newt.c_lflag &= ~( ICANON | ECHO );
+  tcsetattr ( STDIN_FILENO, TCSANOW, &newt );
+  ch = getchar();
+  tcsetattr ( STDIN_FILENO, TCSANOW, &oldt );
+
+  return ch;
+}

@@ -14,6 +14,7 @@
 /*                  TASK VARIABLES                    */
 /******************************************************/
 int socketId;
+short int savingData;
 
 //Structs
 #pragma pack(push, back)
@@ -24,6 +25,8 @@ struct commdata
 	double position;
 	double torque;
 	double time;
+	char msg[20];
+	int size;
 } *message;
 #pragma pack(pop, back)
 
@@ -44,5 +47,7 @@ int Comm_Core();
 //File management functions
 void saveToFile (FILE *f);
 void closeFile (FILE *f);
+void startSaving();
+void finishSaving();
 
 #endif /* COMM_H_ */
