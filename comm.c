@@ -44,7 +44,7 @@ int Comm_Init()
 	char filename[20];
 	scanf("%s", filename);
 	printf("Abrindo stream de arquivo para armazenamento de dados...\n");
-	if((file = fopen(filename,"w")) == NULL)
+	if((file = fopen("startend.txt","w")) == NULL)
 	{
 		printf("Não foi possível abrir o arquivo!");
 		return 0;
