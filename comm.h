@@ -4,9 +4,8 @@
 #include "global.h"
 #include "include.h"
 #include <sys/socket.h>
-#include <netinet/in.h>
-#include <sys/types.h>
 #include <arpa/inet.h>
+#include <netinet/in.h>
 
 #define SERVER "127.0.0.1"
 
@@ -14,23 +13,27 @@
 /*                  TASK VARIABLES                    */
 /******************************************************/
 int socketId;
+int fd;
 short int savingData;
+char buff[255];
 
 //Structs
 #pragma pack(push, back)
 #pragma pack(1)
 struct commdata
 {
-	unsigned short int type;
-	double position;
-	double torque;
-	double time;
-	char msg[20];
-	int size;
+	char 		start;
+	char 		id;
+	char 		command[2];
+	char       *data;
+	char 		size;
+	char        checksum[2];
 } *message;
 #pragma pack(pop, back)
 
-struct sockaddr_in address;
+//struct sockaddr_in address;
+struct termios old, new;
+
 
 //File management
 FILE *file;
@@ -43,6 +46,8 @@ int lineCount;
 int Comm_Init();
 int Comm_Kill();
 int Comm_Core();
+
+int open_port();
 
 //File management functions
 void saveToFile (FILE *f);

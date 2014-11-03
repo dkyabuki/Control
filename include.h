@@ -11,6 +11,8 @@
 #include <math.h>
 #include <sys/mman.h>
 #include <sys/io.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <native/task.h>
 #include <native/timer.h>
 #include <native/heap.h>
