@@ -1,7 +1,7 @@
 #include "comm.h"
 
-#define BAUDRATE B9600
-#define MODEMDEVICE "/dev/ttyS1"
+#define BAUDRATE B19200
+#define MODEMDEVICE "/dev/ttyS0"
 #define _POSIX_SOURCE 1
 
 int Comm_Init()
@@ -51,18 +51,25 @@ int Comm_Init()
 		return 0;
 	}
 
-	tcgetattr(fd, &old);
-	bzero(&new, sizeof(new));
-
-	new.c_cflag = BAUDRATE | CRTSCTS | CS8 | CLOCAL | CREAD;
-	new.c_iflag = IGNPAR | ICRNL;
-	new.c_oflag = 0;
-	new.c_lflag = ICANON;
-	memset(new.c_cc, 0, sizeof(new.c_cc));
-	new.c_cc[VEOF] = 4;
-	new.c_cc[VMIN] = 1;
+	tcgetattr(fd, &options);
+	old = options;
+	cfsetispeed(&options, BAUDRATE);
+	cfsetospeed(&options, BAUDRATE);
+	options.c_cflag |= (CLOCAL | CREAD);
+	options.c_cflag &= ~PARENB;
+	options.c_cflag &= ~CSTOPB;
+	options.c_cflag &= ~CSIZE;
+	options.c_cflag |= CS8;
+	options.c_cflag &= ~CRTSCTS;
+	options.c_iflag = IGNPAR | ICRNL;
+	options.c_iflag &= ~(IXON | IXOFF | IXANY);
+	options.c_oflag = 0;
+	options.c_lflag = (ICANON | ECHO | ECHOE);
+	memset(options.c_cc, 0, sizeof(options.c_cc));
+	options.c_cc[VEOF] = 4;
+	options.c_cc[VMIN] = 1;
 	tcflush(fd, TCIFLUSH);
-	tcsetattr(fd, TCSANOW, &new);
+	tcsetattr(fd, TCSANOW, &options);
 	printf("A configuração da porta serial foi concluída!\n");
 
 	printf("Digite o nome do arquivo para salvar os dados (com o formato): ");
@@ -78,6 +85,7 @@ int Comm_Init()
 	savingData = FALSE;
 	lineCount = 0;
 	return 0;
+	running = false;
 }
 
 int Comm_Kill()
@@ -89,55 +97,46 @@ int Comm_Kill()
 
 int Comm_Core()
 {
-//	memset((char *)message, 0, sizeof(message));
-//	message->type = 1;
-//	message->position = 0;
-//	message->torque = 0;
-//	message->time = 0;
-//	memset(message->msg, 0, sizeof(message->msg));
-//	message->size = 0;
-////	char *aux;
-////	aux = message;
-////	char *code;
-////	code = malloc(3);
-////	code = "01";
-////	memcpy(aux, code, strlen(code));
-////	aux += 2;
-////	*aux = '|';
-////	aux++;
-////	memcpy(aux, &POSITION[2], sizeof(double));
-////	aux += sizeof(double);
-////	*aux = '|';
-////	aux++;
-////	memcpy(aux, &TORQUE[2], sizeof(double));
-////	aux += sizeof(double);
-//
-//	if(sendto(socketId, message, sizeof(message), 0, (struct sockaddr *)&address, sizeof(address)) < 0)
-//	{
-//		perror("sendto failed");
-//		return 0;
-//	}
-
-	int res = read(fd, buff, 255);
-	buff[res] = 0;
-	printf(":%s:%d\n", buff,res);
-
-	if(savingData)
+	if(running == true)
 	{
-		saveToFile (file);
-		lineCount++;
+
+
+		if(savingData)
+		{
+			saveToFile (file);
+			lineCount++;
+		}
 	}
+	else
+	{
+		memset(buff, 0, sizeof(buff));
+		int res;
+		char* aux;
+		aux = buff;
 
-
-//	if(lineCount >= 0 && lineCount < 16000){ 	//salva
-//		saveToFile (file);
-//		lineCount++;
-//	} else if(lineCount == 16000){ 		//para
-//		closeFile(file);
-//		lineCount++;
-//	} else { 					//finish
-//		rt_printf("\tDONE!\n");
-//	}
+		while((res = read(fd, aux, buff + sizeof(buff) - aux -1)) > 0)
+		{
+			aux += res;
+			if(aux[-1] == '\0')
+				break;
+		}
+		printf("mensagem recebida: ");
+		message = (struct commdata *)buff;
+		if(message->start == ':')
+			if(message->id == 'A')
+				switch(message->command[0])
+				{
+				case ('S'):
+					printf("mensagem de config. - ");
+					switch(message->command[1])
+					{
+					case('T'):
+							printf("tarefas\n");
+							break;
+					}
+					break;
+				}
+	}
 	return 0;
 }
 
@@ -169,12 +168,12 @@ void finishSaving(){
 int open_port()
 {
 	int fd;
-	fd = open("/dev/ttyS2", O_RDWR | O_NOCTTY | O_NDELAY);
+	fd = open(MODEMDEVICE, O_RDWR | O_NOCTTY | O_NDELAY);
 	if (fd == -1)
 	{
-		perror("open_port: Unable to open /dev/ttyS2 - ");
+		printf("open_port: Unable to open port\n");
 	}
 	else
-		fcntl(fd, F_SETFL, 0);
+		fcntl(fd, F_SETFL, FNDELAY);
 	return (fd);
 }

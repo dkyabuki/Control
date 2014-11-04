@@ -15,24 +15,25 @@
 int socketId;
 int fd;
 short int savingData;
-char buff[255];
+char buff[262];
+bool running;
 
 //Structs
 #pragma pack(push, back)
 #pragma pack(1)
 struct commdata
 {
-	char 		start;
-	char 		id;
-	char 		command[2];
-	char       *data;
-	char 		size;
-	char        checksum[2];
+	char 				start;
+	char 				id;
+	char 				command[2];
+	unsigned char 		size;
+	char       		   *data;
+	char        		checksum[2];
 } *message;
 #pragma pack(pop, back)
 
 //struct sockaddr_in address;
-struct termios old, new;
+struct termios options, old;
 
 
 //File management
